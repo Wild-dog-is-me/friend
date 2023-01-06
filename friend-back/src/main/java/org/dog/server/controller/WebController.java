@@ -29,4 +29,12 @@ public class WebController {
   public Result login(@RequestBody User user) {
     return Result.success(userService.login(user));
   }
+
+  @ApiOperation(value = "用户登陆")
+  @PostMapping("/register")
+  public Result register(@RequestBody User user) {
+    User res = userService.register(user);
+    return Result.success(res);
+  }
+
 }
