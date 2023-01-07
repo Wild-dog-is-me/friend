@@ -9,6 +9,18 @@ spring:
     hikari:
       minimum-idle: 10
       connection-test-query: SELECT 1
+  mail:
+    # 配置 SMTP 服务器地址
+    host: smtp.qq.com
+    # 发送者邮箱
+    username: 1427774041@qq.com
+    # 配置密码，注意不是真正的密码，而是刚刚申请到的授权码
+    password: drxbjxiaacaibagd
+    # 端口号465或587
+    port: 587
+    # 默认的邮件编码为UTF-8
+    default-encoding: UTF-8
+
     # swagger
   mvc:
     pathmatch:

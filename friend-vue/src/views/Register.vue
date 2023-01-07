@@ -15,6 +15,16 @@
           <el-input v-model="form.confirm" show-password  placeholder="请确认密码" :prefix-icon="Lock"
                     autocomplete="new-password"></el-input>
         </el-form-item>
+        <el-form-item prop="email" >
+          <el-input v-model="form.email" placeholder="请输入邮箱" :prefix-icon="Message"
+                    ></el-input>
+        </el-form-item>
+        <el-form-item prop="emailCode">
+          <div style="display: flex">
+            <el-input style="flex: 1" v-model="form.emailCode" :prefix-icon="ChatLineRound"></el-input>
+            <el-button style="width: 120px; margin-left: 15px" @click="sendEmail" :disabled="time > 0">发送验证码<span v-if="time" type="primary" plain>（{{ time }}）</span></el-button>
+          </div>
+        </el-form-item>
         <el-form-item prop="name">
           <el-input v-model="form.name" show-password  placeholder="请设置昵称" :prefix-icon="UserFilled"
                     ></el-input>
@@ -32,13 +42,56 @@
 
 <script setup>
 import {reactive, ref} from "vue";
-import { User, Lock,UserFilled } from '@element-plus/icons-vue'
+import { User, Lock,UserFilled,Message,ChatLineRound } from '@element-plus/icons-vue'
 import router from "../router";
 import request from "../utils/request";
 import {ElMessage} from "element-plus";
 import { useUserStore} from "../stores/user";
+
 const form = reactive({})
 const ruleFormRef = ref()
+const time = ref(0)
+const interval = ref(-1)
+const reg = /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/
+
+const times = () => {
+  // 清空定时器
+  if (interval.value >= 0) {
+    clearInterval(interval.value)
+  }
+  time.value = 60
+  interval.value = setInterval(() => {
+    if (time.value > 0) {
+      time.value --
+    }
+  }, 1000)
+}
+
+const sendEmail = () => {
+  if (!reg.test(form.email)) {
+    ElMessage.warning("请输入合法邮箱")
+    return
+  }
+  request.get("/email",{
+    params: {
+      email: form.email,
+      type: "REGISTER"
+    }
+  }).then(res => {
+    times()
+    if (res.code === '200') {
+      ElMessage.success("发送成功,有效期五分钟");
+    } else {
+      ElMessage.error(res.msg);
+    }
+  })
+}
+const checkEmail = (rule, value, callback) => {
+  if(!reg.test(value)) {  // test可以校验你的输入值
+    return callback(new Error('邮箱格式不合法'));
+  }
+  callback()
+}
 
 const confirmPassword = (rule,value,callback) => {
   if (value == '') {
@@ -61,7 +114,13 @@ const rules = reactive({
   ],
   name: [
     {required: true, message: '请设置昵称', trigger: 'blur'}
-  ]
+  ],
+  email: [
+    { validator: checkEmail, trigger: 'blur'},
+  ],
+  emailCode: [
+    {required: true, message: '请输入验证码', trigger: 'blur'}
+  ],
 })
 
 
