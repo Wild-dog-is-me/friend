@@ -67,7 +67,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
   @Override
   public User register(UserRequest user) {
     String emailCode = user.getEmailCode();
-    validateEmail(emailCode);
+    validateEmail(user.getEmail() ,emailCode);
     try {
       User saveUser = new User();
       BeanUtils.copyProperties(user, saveUser);
@@ -95,7 +95,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     ThreadUtil.execAsync(() -> {
       emailUtils.sendHtml("【Odin交友网】验证提醒", html, email);
     });
-    CODE_MAP.put(code, System.currentTimeMillis());
+    CODE_MAP.put(email + code, System.currentTimeMillis());
   }
 
   @Override
@@ -105,7 +105,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     if (dbUser == null) {
       throw new ServiceException("未找到当前用户");
     }
-    validateEmail(userRequest.getEmailCode());
+    validateEmail(userRequest.getEmail(),userRequest.getEmailCode());
     String newPass = "admin";
     dbUser.setPassword(newPass);
     try {
@@ -138,8 +138,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     return user;
   }
 
-  private void validateEmail(String emailCode) {
-    Long timestamp = CODE_MAP.get(emailCode);
+  private void validateEmail(String email,String emailCode) {
+    String key = email + emailCode;
+    Long timestamp = CODE_MAP.get(key);
     if (timestamp == null) {
       throw new ServiceException("请先验证邮箱");
     }

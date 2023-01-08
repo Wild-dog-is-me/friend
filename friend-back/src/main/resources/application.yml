@@ -7,7 +7,7 @@ spring:
     username: root
     password: root
     hikari:
-      minimum-idle: 10
+      minimum-idle: 10 # 池中维护的最小空闲连接数
       connection-test-query: SELECT 1
   mail:
     # 配置 SMTP 服务器地址
@@ -21,7 +21,7 @@ spring:
     # 默认的邮件编码为UTF-8
     default-encoding: UTF-8
 
-    # swagger
+  # swagger
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -32,3 +32,4 @@ mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+

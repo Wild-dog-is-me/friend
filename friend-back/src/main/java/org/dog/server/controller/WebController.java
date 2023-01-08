@@ -2,6 +2,7 @@ package org.dog.server.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.dog.server.common.Result;
 import org.dog.server.controller.domain.UserRequest;
 import org.dog.server.entity.User;
@@ -18,15 +19,32 @@ import javax.annotation.Resource;
 
 @Api(tags = "无权限接口")
 @RestController
+@Slf4j
 public class WebController {
 
   @Resource
   private IUserService userService;
 
+  @GetMapping(value = "/")
+  @ApiOperation(value = "版本校验接口")
+  public String version() {
+    String ver = "friend-back-0.0.1-SNAPSHOT";  // 应用版本号
+    Package aPackage = WebController.class.getPackage();
+    String title = aPackage.getImplementationTitle();
+    String version = aPackage.getImplementationVersion();
+    if (title != null && version != null) {
+      ver = String.join("-", title, version);
+    }
+    return ver;
+  }
+
   @ApiOperation(value = "用户登陆")
   @PostMapping("/login")
   public Result login(@RequestBody UserRequest user) {
-    return Result.success(userService.login(user));
+    long startTime = System.currentTimeMillis();
+    User login = userService.login(user);
+    log.info("登陆花费的时间{}ms", System.currentTimeMillis() - startTime);
+    return Result.success(login);
   }
 
   @ApiOperation(value = "用户注册")
