@@ -18,7 +18,6 @@ import java.time.ZoneOffset;
  */
 public class LDTConfig {
 
-
   /**
    * localdatetime 序列化成 13 位时间戳
    * 北京时间

@@ -1,6 +1,5 @@
 package org.dog.server.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
@@ -10,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.dog.server.common.Constants;
+import org.dog.server.common.enums.EmailCodeEnum;
 import org.dog.server.controller.domain.UserRequest;
 import org.dog.server.entity.User;
 import org.dog.server.exception.ServiceException;
@@ -17,13 +17,13 @@ import org.dog.server.mapper.UserMapper;
 import org.dog.server.service.IUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.dog.server.utils.EmailUtils;
+import org.dog.server.utils.RedisUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import static org.dog.server.common.Constants.DATE_RULE_YYYYMMDD;
 
@@ -39,13 +39,16 @@ import static org.dog.server.common.Constants.DATE_RULE_YYYYMMDD;
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
-  private static final Map<String, Long> CODE_MAP = new ConcurrentHashMap<>();
-
   private static final long TIME_IN_MS5 = 5 * 60 * 1000;  // 表示5分钟的毫秒数
 
   @Resource
   private EmailUtils emailUtils;
 
+  /**
+   * 用户登陆
+   * @param user
+   * @return
+   */
   @Override
   public User login(UserRequest user) {
     User dbUser = null;
@@ -66,8 +69,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
   @Override
   public User register(UserRequest user) {
+    String key = Constants.EMAIL_CODE + EmailCodeEnum.REGISTER.getValue() + user.getEmail();
     String emailCode = user.getEmailCode();
-    validateEmail(user.getEmail() ,emailCode);
+    validateEmail(key ,emailCode);
     try {
       User saveUser = new User();
       BeanUtils.copyProperties(user, saveUser);
@@ -77,9 +81,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
   }
 
+  /**
+   * 邮箱发送验证码
+   * @param email
+   * @param type
+   */
   @Override
   public void sendEmail(String email, String type) {
-    String code = RandomUtil.randomString(6);
+    String emailPrefix = EmailCodeEnum.getValue(type);
+    if (StrUtil.isBlank(emailPrefix)) {
+      throw new ServiceException("不支持的邮箱验证类型");
+    }
+    String key = Constants.EMAIL_CODE + emailPrefix + email;
+    Long expireTime = RedisUtils.getExpireTime(key);
+    // 限制超过1分钟才可以继续发送邮件，判断过期时间是否大于4分钟
+    if (expireTime != null && expireTime > 4 * 60) {
+      throw new ServiceException("发送邮箱验证过于频繁");
+    }
+
+    Integer code = Integer.valueOf(RandomUtil.randomNumbers(6));
     log.info("本次验证的code是：{}", code);
     String context = "<b>尊敬的用户：</b><br><br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;您好，" +
       "Odin交友网提醒您本次的验证码是：<b>{}</b>，" +
@@ -91,21 +111,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         throw new ServiceException("邮箱已经注册！");
       }
     }
-
+    // 线程异步执行，防止网络阻塞
     ThreadUtil.execAsync(() -> {
       emailUtils.sendHtml("【Odin交友网】验证提醒", html, email);
     });
-    CODE_MAP.put(email + code, System.currentTimeMillis());
+    RedisUtils.setCacheObject(key, code, TIME_IN_MS5, TimeUnit.MILLISECONDS);
   }
 
+  /**
+   * 重置密码功能
+   * @param userRequest
+   * @return
+   */
   @Override
   public String passwordReset(UserRequest userRequest) {
     String email = userRequest.getEmail();
+    String key = Constants.EMAIL_CODE + EmailCodeEnum.RESET_PASSWORD.getValue() + email;
     User dbUser = getOne(new UpdateWrapper<User>().eq("email", email));
     if (dbUser == null) {
       throw new ServiceException("未找到当前用户");
     }
-    validateEmail(userRequest.getEmail(),userRequest.getEmailCode());
+    validateEmail(key,userRequest.getEmailCode());
     String newPass = "admin";
     dbUser.setPassword(newPass);
     try {
@@ -116,6 +142,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     return newPass;
   }
 
+  /**
+   * 用户注册
+   * @param user 前端传入用户
+   * @return 注册用户信息
+   */
   private User saveUser(User user) {
     User dbUser = getOne(new UpdateWrapper<User>().eq("username", user.getUsername()));
     if (dbUser != null) {
@@ -138,15 +169,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     return user;
   }
 
-  private void validateEmail(String email,String emailCode) {
-    String key = email + emailCode;
-    Long timestamp = CODE_MAP.get(key);
-    if (timestamp == null) {
-      throw new ServiceException("请先验证邮箱");
+  /**
+   * 邮箱验证码验证功能
+   * @param emailKey Redis中存储的key
+   * @param emailCode 前端传入的验证码
+   */
+  private void validateEmail(String emailKey,String emailCode) {
+    // 从Redis中获取验证码
+    Integer code = RedisUtils.getCacheObject(emailKey);
+    if (code == null) {
+      throw new ServiceException("验证码失效");
     }
-    if (timestamp + TIME_IN_MS5 < System.currentTimeMillis()) {
-      throw new ServiceException("验证码过期");
+    if (!emailCode.equals(code.toString())) {
+      throw new ServiceException("验证码错误");
     }
-    CODE_MAP.remove(emailCode); // 清除缓存
+    // 验证通过后立即删除
+    RedisUtils.deleteObject(emailKey);
   }
 }

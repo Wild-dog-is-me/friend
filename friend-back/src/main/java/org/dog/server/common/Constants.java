@@ -13,4 +13,6 @@ public interface Constants {
   // 时间的规则
   String DATE_RULE_YYYYMMDD = "yyyyMMdd";
 
+  String EMAIL_CODE = "email.code.";
+
 }
