@@ -15,4 +15,7 @@ public interface Constants {
 
   String EMAIL_CODE = "email.code.";
 
+  String LOGIN_USER_KEY = "userInfo";
+
+  String PASSWORD_KEY = "fas__ef[]d--awed[]/da(-_=wdm]";
 }

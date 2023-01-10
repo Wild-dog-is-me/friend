@@ -98,7 +98,7 @@ const login = ()=> {
       request.post("/login",form).then(res => {
         console.log(res)
         if (res.code === '200') {
-          store.setUser(res.data)
+          store.setLoginInfo(res.data)
           ElMessage.success("登陆成功");
           router.push("/");
         } else {
@@ -158,7 +158,6 @@ const resetPassword = () => {
   })
 }
 
-console.log(store.user)
 </script>
 
 <style scoped>

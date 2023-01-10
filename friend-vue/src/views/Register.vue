@@ -134,7 +134,7 @@ const register = ()=> {
         console.log(form)
         console.log(res)
         if (res.code === '200') {
-          store.setUser(res.data)
+          store.setLoginInfo(res.data)
           ElMessage.success("注册成功");
           router.push("/");
         } else {

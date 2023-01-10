@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.dog.server.common.Result;
+import org.dog.server.controller.domain.LoginDTO;
 import org.dog.server.controller.domain.UserRequest;
 import org.dog.server.entity.User;
 import org.dog.server.service.IUserService;
@@ -42,7 +43,7 @@ public class WebController {
   @PostMapping("/login")
   public Result login(@RequestBody UserRequest user) {
     long startTime = System.currentTimeMillis();
-    User login = userService.login(user);
+    LoginDTO login = userService.login(user);
     log.info("登陆花费的时间{}ms", System.currentTimeMillis() - startTime);
     return Result.success(login);
   }

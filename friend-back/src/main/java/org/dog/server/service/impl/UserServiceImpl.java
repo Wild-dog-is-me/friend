@@ -1,5 +1,8 @@
 package org.dog.server.service.impl;
 
+import cn.dev33.satoken.secure.SaSecureUtil;
+import cn.dev33.satoken.stp.SaTokenInfo;
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
@@ -10,6 +13,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.dog.server.common.Constants;
 import org.dog.server.common.enums.EmailCodeEnum;
+import org.dog.server.controller.domain.LoginDTO;
 import org.dog.server.controller.domain.UserRequest;
 import org.dog.server.entity.User;
 import org.dog.server.exception.ServiceException;
@@ -50,7 +54,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
    * @return
    */
   @Override
-  public User login(UserRequest user) {
+  public LoginDTO login(UserRequest user) {
     User dbUser = null;
     try {
       dbUser = getOne(new UpdateWrapper<User>().eq("username", user.getUsername())
@@ -61,10 +65,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     if (dbUser == null) {
       throw new ServiceException("未找到用户");
     }
-    if (!user.getPassword().equals(dbUser.getPassword())) {
+    String securePass = SaSecureUtil.aesEncrypt(Constants.PASSWORD_KEY, user.getPassword());
+    if (!securePass.equals(dbUser.getPassword())) {
       throw new ServiceException("用户名或密码错误");
     }
-    return dbUser;
+    StpUtil.login(dbUser.getUid());
+    StpUtil.getSession().set(Constants.LOGIN_USER_KEY, dbUser);
+    SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
+    String tokenValue = StpUtil.getTokenValue();
+    log.info("token信息:{}", tokenInfo);
+    return LoginDTO.builder().user(dbUser).token(tokenValue).build();
   }
 
   @Override
@@ -105,17 +115,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
       "Odin交友网提醒您本次的验证码是：<b>{}</b>，" +
       "有效期5分钟。<br><br><br><b>Odin交友网</b>";
     String html = StrUtil.format(context, code);
-    if ("REGISTER".equals(type) ) {
-      User dbUser = getOne(new QueryWrapper<User>().eq("email", email));
+    User dbUser = getOne(new QueryWrapper<User>().eq("email", email));
+    if (EmailCodeEnum.REGISTER.equals(EmailCodeEnum.getEnum(type))) {
       if (dbUser != null) {
         throw new ServiceException("邮箱已经注册！");
+      }
+    } else if (EmailCodeEnum.RESET_PASSWORD.equals(EmailCodeEnum.getEnum(type))) {
+      if (dbUser == null) {
+        throw new ServiceException("当前用户不存在");
       }
     }
     // 线程异步执行，防止网络阻塞
     ThreadUtil.execAsync(() -> {
       emailUtils.sendHtml("【Odin交友网】验证提醒", html, email);
+      RedisUtils.setCacheObject(key, code, TIME_IN_MS5, TimeUnit.MILLISECONDS);
     });
-    RedisUtils.setCacheObject(key, code, TIME_IN_MS5, TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -160,6 +174,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     if (StrUtil.isBlank(user.getPassword())) {
       user.setPassword("admin"); // 设置默认密码
     }
+    // 加密用户密码
+    user.setPassword(SaSecureUtil.aesEncrypt(Constants.PASSWORD_KEY, user.getPassword()));
     // 设置用户唯一uid
     user.setUid(IdUtil.fastSimpleUUID());
     boolean save = save(user);

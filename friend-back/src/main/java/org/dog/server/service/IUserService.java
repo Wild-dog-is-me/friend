@@ -1,5 +1,6 @@
 package org.dog.server.service;
 
+import org.dog.server.controller.domain.LoginDTO;
 import org.dog.server.controller.domain.UserRequest;
 import org.dog.server.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -14,7 +15,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IUserService extends IService<User> {
 
-  User login(UserRequest user);
+  LoginDTO login(UserRequest user);
 
   User register(UserRequest user);
 
