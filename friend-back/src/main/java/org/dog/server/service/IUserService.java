@@ -17,7 +17,7 @@ public interface IUserService extends IService<User> {
 
   LoginDTO login(UserRequest user);
 
-  User register(UserRequest user);
+  void register(UserRequest user);
 
   void sendEmail(String email, String type);
 

@@ -1,3 +1,3 @@
 export default {
-  serverUrl: 'localhost:9099'
+  serverUrl: 'localhost:10000'
 }
