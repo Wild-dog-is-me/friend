@@ -70,3 +70,9 @@ sa-token:
   token-prefix: Bearer
   # jwt秘钥
   jwt-secret-key: qwertyuiop[]\';lkjhgfdsazxcvbnm,./
+
+files:
+  upload:
+    path: //Users//odin//Documents//code-study//friend//friend-back//src//main//resources//file//
+  download:
+    ip: localhost

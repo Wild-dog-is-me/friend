@@ -29,10 +29,10 @@
         <el-dropdown>
           <div class="el-dropdown-link" style="line-height: 60px">
             <el-avatar :size="40" :src="store.loginInfo.user.avatar" style="position: relative; top: 10px; right: 5px" />
-                        <span style="font-size: 18px; margin-left: 5px;display: inline-block">{{ store.loginInfo.user.name }}</span>
-                        <el-icon class="el-icon--right">
-                          <arrow-down />
-                        </el-icon>
+            <!--            <span style="font-size: 14px; margin-left: 45px">{{ store.loginInfo.user.name }}</span>-->
+            <!--            <el-icon class="el-icon&#45;&#45;right">-->
+            <!--              <arrow-down />-->
+            <!--            </el-icon>-->
           </div>
           <template #dropdown>
             <el-dropdown-menu>
@@ -58,8 +58,8 @@
 </template>
 
 <script setup>
-import {useUserStore} from "../stores/user";
-import router from "../router/index";
+import {useUserStore} from "@/stores/user";
+import router from "@/router";
 import {ArrowDown} from '@element-plus/icons-vue'
 
 const store = useUserStore()

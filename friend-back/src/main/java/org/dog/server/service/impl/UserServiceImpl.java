@@ -1,8 +1,6 @@
 package org.dog.server.service.impl;
 
 import cn.dev33.satoken.secure.BCrypt;
-import cn.dev33.satoken.secure.SaSecureUtil;
-import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.thread.ThreadUtil;
@@ -24,14 +22,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.dog.server.utils.EmailUtils;
 import org.dog.server.utils.RedisUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static org.dog.server.common.Constants.DATE_RULE_YYYYMMDD;
 
 /**
  * <p>

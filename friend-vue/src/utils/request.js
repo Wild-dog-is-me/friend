@@ -1,6 +1,6 @@
 import { ElMessage } from 'element-plus'
 import router from '../router'
-import config from "/public/config";
+import config from "../config.js";
 import axios from "axios";
 import { useUserStore } from "../stores/user.js";
 

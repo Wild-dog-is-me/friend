@@ -87,10 +87,6 @@ public class LogAspect {
 
   /**
    * @description: TODO 毫秒转时分秒
-   * @author: 万物皆可喵
-   * @date: 2022/10/9 16:34
-   * @param: [ms]
-   * @return: java.lang.String
    **/
   public static String formatTime(Long ms) {
     Integer ss = 1000;

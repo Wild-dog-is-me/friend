@@ -47,8 +47,8 @@ public class MyFilter implements Filter {
       startTime = System.currentTimeMillis();
     }
     long now = System.currentTimeMillis();
-    log.info("拦截了请求， count： {}", count);
-    log.info("时间窗口: {}ms, count: {}", (now - startTime), count);
+//    log.info("拦截了请求， count： {}", count);
+//    log.info("时间窗口: {}ms, count: {}", (now - startTime), count);
     if (now - startTime <= windowTime) {
       if (count > door) {  // 超过了阈值
         //   限流操作
@@ -66,7 +66,7 @@ public class MyFilter implements Filter {
     }
     HttpServletRequest request = (HttpServletRequest) servletRequest;
     filterChain.doFilter(servletRequest, servletResponse);
-    log.info("接口请求的路径：{}", request.getServletPath());
+//    log.info("接口请求的路径：{}", request.getServletPath());
   }
 
   @Override

@@ -51,8 +51,8 @@ public class WebController {
   @ApiOperation(value = "用户注册")
   @PostMapping("/register")
   public Result register(@RequestBody UserRequest user) {
-    User res = userService.register(user);
-    return Result.success(res);
+    userService.register(user);
+    return Result.success();
   }
 
   @ApiOperation(value = "邮箱验证接口")
