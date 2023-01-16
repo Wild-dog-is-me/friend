@@ -72,3 +72,15 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.ml5 {
+  margin-left: 5px;
+}
+
+.w300 {
+  width: 300px
+}
+
+th {
+  background-color: aliceblue !important;
+}
