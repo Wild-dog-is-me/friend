@@ -18,10 +18,10 @@
 
 <script setup>
 import { User,Message,Histogram, Lock } from '@element-plus/icons-vue'
-import MyInfo from "../components/MyInfo.vue";
-import MyDynamic from "../components/MyDynamic.vue";
+import MyInfo from "@/components/MyInfo.vue";
+import MyDynamic from "@/components/MyDynamic.vue";
 import { useRoute } from "vue-router";
-import router from "../router";
+import router from "@/router";
 import {inject} from "vue";
 
 const reload = inject('reload')

@@ -18,7 +18,7 @@ load()
       <div class="dynamic-box" style="width: 60%; padding: 20px; border: 1px solid #ccc">
         <div style="display:flex;">
           <img style="width: 50px; height: 50px; margin-right: 20px; border-radius: 50%"
-               src="http://localhost:9090/file/download/3ca15fcdf90747418e2ec55dbe8d9608.jpg?loginId=4918ea50c06a458f94878abe742131as&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiI0OTE4ZWE1MGMwNmE0NThmOTQ4NzhhYmU3NDIxMzFhcyIsInJuU3RyIjoiWEFFbHFOSzJVM1RkNTlpbFFzSHFvRENWWUdndlBLam4ifQ.8v1jVwFUcywDA2FmcztnZdbsDSTwRAD9ttTEVreRuW0"
+               src="https://pic.imgdb.cn/item/63bd7fd1be43e0d30e49cd4d.jpg"
                alt="">
           <div style="flex: 1; line-height: 25px">
             <div style="font-weight: bold">呵呵笋的小煮艺</div>
