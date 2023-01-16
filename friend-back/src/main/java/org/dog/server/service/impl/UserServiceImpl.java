@@ -150,6 +150,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     return newPass;
   }
 
+  @Override
+  public void logout(String uid) {
+    // 退出登录
+    StpUtil.logout(uid);
+    log.info("用户{}退出成功", uid);
+  }
+
   /**
    * 校验邮箱
    *

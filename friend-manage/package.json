@@ -1,5 +1,5 @@
 {
-  "name": "friend-manage",
+  "name": "partner-manager",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -14,7 +14,6 @@
     "pinia": "^2.0.28",
     "pinia-plugin-persistedstate": "^3.0.2",
     "postcss-import": "^15.1.0",
-    "sourcemap-codec": "^1.4.8",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },

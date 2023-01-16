@@ -6,46 +6,46 @@ import {ElMessage} from "element-plus";
 import { useUserStore } from "@/stores/user";
 import router from "@/router";
 
-const loginData = reactive({})
-const rules = reactive({
-  username: [
-    { required: true, message: '请输入账号', trigger: 'blur' },
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 3, max: 20, message: '密码长度在3-20位之间', trigger: 'blur' },
-  ],
-})
-const ruleFormRef = ref()
-const login = () => {
-  ruleFormRef.value.validate(valid => {
-    if (valid) {
-      // 发送表单数据给后台
-      request.post('/login', loginData).then(res => {
-        if (res.code === '200') {
-          ElMessage.success('登录成功')
-          const userStore = useUserStore()
-          userStore.setManagerInfo(res.data)
-          router.push('/')
-        } else {
-          ElMessage.error(res.msg)
-        }
-      })
-    }
+  const loginData = reactive({})
+  const rules = reactive({
+    username: [
+      { required: true, message: '请输入账号', trigger: 'blur' },
+    ],
+    password: [
+      { required: true, message: '请输入密码', trigger: 'blur' },
+      { min: 3, max: 20, message: '密码长度在3-20位之间', trigger: 'blur' },
+    ],
   })
-}
+  const ruleFormRef = ref()
+  const login = () => {
+    ruleFormRef.value.validate(valid => {
+      if (valid) {
+        // 发送表单数据给后台
+        request.post('/login', loginData).then(res => {
+          if (res.code === '200') {
+            ElMessage.success('登录成功')
+            const userStore = useUserStore()
+            userStore.setManagerInfo(res.data)
+            router.push('/')
+          } else {
+            ElMessage.error(res.msg)
+          }
+        })
+      }
+    })
+  }
 
 </script>
 
 <template>
-  <div style="height: 100vh; overflow: hidden; background-image: linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%);">
-    <div style="width: 400px; margin: 250px auto;background-image: linear-gradient(to right, #74ebd5 0%, #9face6 100%); border: 1px solid #ddd; padding: 30px; border-radius: 10px">
+  <div style="height: 100vh; overflow: hidden; background-color: aliceblue">
+    <div style="width: 400px; margin: 150px auto; background-color: white; border: 1px solid #ddd; padding: 30px; border-radius: 10px">
       <el-form
-        ref="ruleFormRef"
-        :model="loginData"
-        :rules="rules"
-        size="large"
-        status-icon
+          ref="ruleFormRef"
+          :model="loginData"
+          :rules="rules"
+          size="large"
+          status-icon
       >
         <div style="text-align: center; color: dodgerblue; font-size: 30px; font-weight: bold; margin-bottom: 30px">登 录</div>
         <el-form-item prop="username">

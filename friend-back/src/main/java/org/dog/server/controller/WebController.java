@@ -48,6 +48,13 @@ public class WebController {
     return Result.success(login);
   }
 
+  @ApiOperation(value = "用户退出")
+  @GetMapping("/logout/{uid}")
+  public Result logout(@PathVariable String uid) {
+    userService.logout(uid);
+    return Result.success();
+  }
+
   @ApiOperation(value = "用户注册")
   @PostMapping("/register")
   public Result register(@RequestBody UserRequest user) {

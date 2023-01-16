@@ -22,4 +22,7 @@ public interface IUserService extends IService<User> {
   void sendEmail(String email, String type);
 
   String passwordReset(UserRequest userRequest);
+
+  void logout(String uid);
+
 }
