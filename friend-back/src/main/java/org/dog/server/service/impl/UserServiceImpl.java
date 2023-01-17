@@ -101,7 +101,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     Integer code = Integer.valueOf(RandomUtil.randomNumbers(6));
     log.info("本次验证的code是：{}", code);
     String context = "<b>尊敬的用户：</b><br><br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;您好，" +
-      "Partner交友网提醒您本次的验证码是：<b>{}</b>，" +
+      "Odin交友网提醒您本次的验证码是：<b>{}</b>，" +
       "有效期5分钟。<br><br><br><b>Partner交友网</b>";
     String html = StrUtil.format(context, code);
     // 校验邮箱是否已注册
@@ -117,7 +117,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
     // 忘记密码
     ThreadUtil.execAsync(() -> {   // 多线程执行异步请求，可以防止网络阻塞
-      emailUtils.sendHtml("【Partner交友网】验证提醒", html, email);
+      emailUtils.sendHtml("【Odin交友网】验证提醒", html, email);
 
       RedisUtils.setCacheObject(key, code, TIME_IN_MS5, TimeUnit.MILLISECONDS);
     });

@@ -21,7 +21,7 @@ public class MyWebMvcConfig extends WebMvcConfigurationSupport {
     // 注册 Sa-Token 拦截器，校验规则为 StpUtil.checkLogin() 登录校验。
     registry.addInterceptor(new SaInterceptor(handle -> StpUtil.checkLogin()))
       .addPathPatterns("/**")
-      .excludePathPatterns("/", "/login", "/register", "/email", "/password/reset", "/file/download/**")
+      .excludePathPatterns("/", "/login", "/register", "/email", "/password/reset", "/file/download/**", "/**/export")
       .excludePathPatterns("/swagger**/**", "/webjars/**", "/v3/**", "/doc.html", "/favicon.ico");  // 排除 swagger拦截
   }
 

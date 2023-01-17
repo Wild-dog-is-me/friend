@@ -38,8 +38,8 @@ import router from "@/router";
 </script>
 
 <template>
-  <div style="height: 100vh; overflow: hidden; background-color: aliceblue">
-    <div style="width: 400px; margin: 150px auto; background-color: white; border: 1px solid #ddd; padding: 30px; border-radius: 10px">
+  <div style="height: 100vh; overflow: hidden; background-image: linear-gradient(45deg, #93a5cf 0%, #e4efe9 100%);">
+    <div style="width: 400px; margin: 250px auto;background-image: linear-gradient(to top, #a8edea 0%, #fed6e3 100%); border: 1px solid #ddd; padding: 30px; border-radius: 10px">
       <el-form
           ref="ruleFormRef"
           :model="loginData"

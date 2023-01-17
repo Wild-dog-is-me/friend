@@ -22,7 +22,6 @@ const logout = () => {
       ElMessage.error(res.msg)
     }
   })
-
 }
 </script>
 

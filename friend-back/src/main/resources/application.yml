@@ -57,7 +57,7 @@ mybatis-plus:
 sa-token:
   token-name: Authorization
   # token有效期，单位s 默认2小时, -1代表永不过期
-  timeout: 7200
+  timeout: 10800
   # 是否允许同一账号并发登录
   is-concurrent: true
   # 在多人登录同一账号时，是否共用一个token
