@@ -30,7 +30,7 @@ import java.util.*;
 @Slf4j
 public class CodeGenerator {
 
-  private static final String TABLE = "sys_user";
+  private static final String TABLE = "sys_permission";
   private static final String PACKAGE_NAME = "org.dog.server";
   private static final String AUTHOR = "Odin";
 

@@ -64,7 +64,9 @@ const logout = () => {
               <el-icon><location /></el-icon>
               <span>Navigator One</span>
             </template>
-            <el-menu-item index="/">item one</el-menu-item>
+            <el-menu-item index="/user">用户</el-menu-item>
+            <el-menu-item index="/role">角色</el-menu-item>
+            <el-menu-item index="/permission">权限</el-menu-item>
           </el-sub-menu>
           <el-menu-item index="2">
             <el-icon><icon-menu /></el-icon>

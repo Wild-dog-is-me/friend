@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 import {useUserStore} from "@/stores/user";
 
 const router = createRouter({
@@ -13,7 +13,22 @@ const router = createRouter({
         {
           path: 'home',
           name: 'Home',
-          component: () => import('../views/HomeView.vue')
+          component: () => import('../views/Home.vue')
+        },
+        {
+          path: 'user',
+          name: 'User',
+          component: () => import('../views/User.vue')
+        },
+        {
+          path: 'role',
+          name: 'Role',
+          component: () => import('../views/Role.vue')
+        },
+        {
+          path: 'permission',
+          name: 'Permission',
+          component: () => import('../views/Permission.vue')
         },
         {
           path: 'dynamic',
