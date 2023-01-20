@@ -135,7 +135,6 @@ public class RoleController {
   public Result imp(MultipartFile file) throws Exception {
     InputStream inputStream = file.getInputStream();
     ExcelReader reader = ExcelUtil.getReader(inputStream);
-    // 通过 javabean的方式读取Excel内的对象，但是要求表头必须是英文，跟javabean的属性要对应起来
     List<Role> list = reader.readAll(Role.class);
 
     roleService.saveBatch(list);
