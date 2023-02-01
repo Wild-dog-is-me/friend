@@ -2,6 +2,9 @@ package org.dog.server.service;
 
 import org.dog.server.entity.Role;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.dog.server.entity.RolePermission;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IRoleService extends IService<Role> {
 
+  void savePermission(Integer roleId, List<Integer> permissionIds);
 }

@@ -1,13 +1,5 @@
 <script setup>
-import {
-  Search,
-  RefreshLeft,
-  Plus,
-  Bottom,
-  Top,
-  Remove
-} from '@element-plus/icons-vue'
-import {reactive, ref} from "vue";
+import {nextTick, reactive, ref} from "vue";
 import request from "@/utils/request";
 import {ElMessage} from "element-plus";
 import config from "../../config";
@@ -16,8 +8,9 @@ import {useUserStore} from "@/stores/user";
 const name = ref('')
 const address = ref('')
 const pageNum = ref(1)
-const pageSize = ref(2)
+const pageSize = ref(5)
 const total = ref(0)
+const roles = ref([])
 
 const state = reactive({
   tableData: [],
@@ -58,6 +51,10 @@ const load = () => {
     state.tableData = res.data.records
     total.value = res.data.total
   })
+
+  request.get('/role').then(res => {
+    roles.value = res.data
+  })
 }
 load()  // 调用 load方法拿到后台数据
 
@@ -92,6 +89,9 @@ const rules = reactive({
   address: [
     { required: true, message: '请输入地址', trigger: 'blur' },
   ],
+  role: [
+    { required: true, message: '请选择角色', trigger: 'blur' },
+  ]
 })
 const ruleFormRef = ref()
 
@@ -125,9 +125,11 @@ const save = () => {
 
 // 编辑
 const handleEdit = (raw) => {
-  state.form = JSON.parse(JSON.stringify(raw))
   dialogFormVisible.value = true
-  ruleFormRef.value.resetFields()
+  nextTick(() => {
+    ruleFormRef.value.resetFields()
+    state.form = JSON.parse(JSON.stringify(raw))
+  })
 }
 
 // 删除
@@ -155,6 +157,9 @@ const handleImportSuccess = () => {
   load()
   ElMessage.success("导入成功")
 }
+
+
+
 </script>
 
 <template>
@@ -182,12 +187,12 @@ const handleImportSuccess = () => {
         </el-icon>  <span style="vertical-align: middle"> 新增 </span>
       </el-button>
       <el-upload
-          class="ml5"
-          :show-file-list="false"
-          style="display: inline-block; position: relative; top: 3px"
-          :action='`http://${config.serverUrl}/user/import`'
-          :on-success="handleImportSuccess"
-          :headers="{ Authorization: token}"
+        class="ml5"
+        :show-file-list="false"
+        style="display: inline-block; position: relative; top: 3px"
+        :action='`http://${config.serverUrl}/user/import`'
+        :on-success="handleImportSuccess"
+        :headers="{ Authorization: token}"
       >
         <el-button type="primary">
           <el-icon style="vertical-align: middle">
@@ -218,6 +223,11 @@ const handleImportSuccess = () => {
         <el-table-column prop="name" label="名称"></el-table-column>
         <el-table-column prop="address" label="地址"></el-table-column>
         <el-table-column prop="email" label="邮箱"></el-table-column>
+        <el-table-column prop="role" label="角色">
+          <template #default="scope">
+            <span v-if="roles.length">{{ roles.find(r => r.flag === scope.row.role).name }}</span>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="180">
           <template #default="scope">
             <el-button type="primary" @click="handleEdit(scope.row)">编辑</el-button>
@@ -233,14 +243,14 @@ const handleImportSuccess = () => {
 
     <div style="margin: 10px 0">
       <el-pagination
-          @current-change="currentChange"
-          @size-change="sizeChange"
-          v-model:current-page="pageNum"
-          v-model:page-size="pageSize"
-          background
-          :page-sizes="[2, 5, 10, 20]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
+        @current-change="currentChange"
+        @size-change="sizeChange"
+        v-model:current-page="pageNum"
+        v-model:page-size="pageSize"
+        background
+        :page-sizes="[2, 5, 10, 20]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
       />
     </div>
 
@@ -251,6 +261,11 @@ const handleImportSuccess = () => {
         </el-form-item>
         <el-form-item prop="name" label="姓名">
           <el-input v-model="state.form.name" autocomplete="off" />
+        </el-form-item>
+        <el-form-item prop="role" label="角色" >
+          <el-select v-model="state.form.role" style="width: 100%">
+            <el-option v-for="item in roles" :label="item.name" :value="item.flag" :key="item.id"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item prop="email" label="邮箱">
           <el-input v-model="state.form.email" autocomplete="off" />

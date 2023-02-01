@@ -75,6 +75,12 @@ public class Permission implements Serializable {
   @TableLogic(value = "0", delval = "id")
   private Integer deleted;
 
+  @ApiModelProperty("类型")
+  @Alias("类型")
+  private Integer type;
+
+  private Boolean hide;
+
   // 创建时间
   @ApiModelProperty("创建时间")
   @Alias("创建时间")

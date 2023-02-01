@@ -55,6 +55,7 @@ const load = () => {
   }).then(res => {
     state.tableData = res.data.records
     total.value = res.data.total
+    console.log(state.tableData)
   })
 }
 load()  // 调用 load方法拿到后台数据

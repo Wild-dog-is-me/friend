@@ -1,12 +1,4 @@
 <script setup>
-import {
-  Search,
-  RefreshLeft,
-  Plus,
-  Bottom,
-  Top,
-  Remove
-} from '@element-plus/icons-vue'
 import {nextTick, reactive, ref} from "vue";
 import request from "@/utils/request";
 import {ElMessage} from "element-plus";
@@ -17,10 +9,15 @@ const name = ref('')
 const pageNum = ref(1)
 const pageSize = ref(2)
 const total = ref(0)
+const permissionTreeRef = ref()
+const userStore = useUserStore()
+const user = userStore.getUser
+const token = userStore.getBearerToken
 
 const state = reactive({
   tableData: [],
-  form: {}
+  form: {},
+  treeData: []
 })
 const multipleSelection = ref([])
 
@@ -56,6 +53,10 @@ const load = () => {
     state.tableData = res.data.records
     total.value = res.data.total
   })
+
+  request.get('/permission/tree').then(res => {
+    state.treeData = res.data
+  })
 }
 load()  // 调用 load方法拿到后台数据
 
@@ -78,6 +79,9 @@ const dialogFormVisible = ref(false)
 const rules = reactive({
   name: [
     { required: true, message: '请输入名称', trigger: 'blur' },
+  ],
+  flag: [
+    { required: true, message: '请输入唯一标识', trigger: 'blur' },
   ]
 })
 const ruleFormRef = ref()
@@ -95,6 +99,13 @@ const handleAdd = () => {
 const save = () => {
   ruleFormRef.value.validate(valid => {   // valid就是校验的结果
     if (valid) {
+      // 目前被选中的菜单节点
+      let checkedKeys = permissionTreeRef.value.getCheckedKeys();
+      // 半选中的菜单节点
+      let halfCheckedKeys = permissionTreeRef.value.getHalfCheckedKeys();
+      checkedKeys.unshift.apply(checkedKeys, halfCheckedKeys);
+
+      state.form.permissionIds = checkedKeys
       request.request({
         url: '/role',
         method: state.form.id ? 'put' : 'post',
@@ -104,6 +115,9 @@ const save = () => {
           ElMessage.success('保存成功')
           dialogFormVisible.value = false
           load()  // 刷新表格数据
+          if (state.form.flag === 'ADMIN') {
+            logout()
+          }
         } else {
           ElMessage.error(res.msg)
         }
@@ -118,6 +132,13 @@ const handleEdit = (raw) => {
   nextTick(() => {
     ruleFormRef.value.resetFields()
     state.form = JSON.parse(JSON.stringify(raw))
+
+    if (!raw.permissionIds.length) {  // 设置无任何节点选择的状态
+      permissionTreeRef.value.setCheckedKeys([])
+    }
+    raw.permissionIds.forEach(v => {
+      permissionTreeRef.value.setChecked(v, true, false)  // 给权限树设置选中的节点
+    })
   })
 }
 
@@ -138,13 +159,23 @@ const exportData = () => {
   window.open(`http://${config.serverUrl}/role/export`)
 }
 
-const userStore = useUserStore()
-const token = userStore.getBearerToken
+
 
 const handleImportSuccess = () => {
   // 刷新表格
   load()
   ElMessage.success("导入成功")
+}
+
+
+const logout = () => {
+  request.get('/logout/' + user.uid).then(res => {
+    if (res.code === '200') {
+      userStore.logout()
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
 }
 </script>
 
@@ -172,12 +203,12 @@ const handleImportSuccess = () => {
         </el-icon>  <span style="vertical-align: middle"> 新增 </span>
       </el-button>
       <el-upload
-          class="ml5"
-          :show-file-list="false"
-          style="display: inline-block; position: relative; top: 3px"
-          :action='`http://${config.serverUrl}/role/import`'
-          :on-success="handleImportSuccess"
-          :headers="{ Authorization: token}"
+        class="ml5"
+        :show-file-list="false"
+        style="display: inline-block; position: relative; top: 3px"
+        :action='`http://${config.serverUrl}/role/import`'
+        :on-success="handleImportSuccess"
+        :headers="{ Authorization: token}"
       >
         <el-button type="primary">
           <el-icon style="vertical-align: middle">
@@ -223,14 +254,14 @@ const handleImportSuccess = () => {
 
     <div style="margin: 10px 0">
       <el-pagination
-          @current-change="currentChange"
-          @size-change="sizeChange"
-          v-model:current-page="pageNum"
-          v-model:page-size="pageSize"
-          background
-          :page-sizes="[2, 5, 10, 20]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
+        @current-change="currentChange"
+        @size-change="sizeChange"
+        v-model:current-page="pageNum"
+        v-model:page-size="pageSize"
+        background
+        :page-sizes="[2, 5, 10, 20]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
       />
     </div>
 
@@ -241,6 +272,12 @@ const handleImportSuccess = () => {
         </el-form-item>
         <el-form-item prop="flag" label="唯一标识" >
           <el-input v-model="state.form.flag" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="权限" >
+          <div style="width: 100%; border: 1px solid #ccc; border-radius: 5px; padding: 5px">
+            <el-tree default-expand-all ref="permissionTreeRef" :data="state.treeData" :props="{ label: 'name', value: 'id' }"
+                     show-checkbox node-key="id"></el-tree>
+          </div>
         </el-form-item>
 
       </el-form>

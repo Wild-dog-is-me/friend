@@ -10,12 +10,15 @@ import java.net.URLEncoder;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import org.dog.server.entity.RolePermission;
+import org.dog.server.mapper.RolePermissionMapper;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.dog.server.common.Result;
@@ -41,10 +44,15 @@ public class RoleController {
   @Resource
   private IRoleService roleService;
 
+  @Resource
+  private RolePermissionMapper rolePermissionMapper;
+
   @PostMapping
   public Result save(@RequestBody Role role) {
     try {
       roleService.save(role);
+      roleService.savePermission(role.getId(), role.getPermissionIds());
+
     } catch (Exception e) {
       log.error("新增错误", e);
       if (e instanceof DuplicateKeyException) {
@@ -55,10 +63,16 @@ public class RoleController {
     return Result.success();
   }
 
+  @PostMapping("/rolePermission")
+  public Result rolePermission(@RequestBody List<RolePermission> rolePermissionList) {
+    return Result.success();
+  }
+
   @PutMapping
   public Result update(@RequestBody Role role) {
     try {
       roleService.updateById(role);
+      roleService.savePermission(role.getId(), role.getPermissionIds());
     } catch (Exception e) {
       log.error("更新错误", e);
       if (e instanceof DuplicateKeyException) {
@@ -68,6 +82,7 @@ public class RoleController {
     }
     return Result.success();
   }
+
 
   @DeleteMapping("/{id}")
   public Result delete(@PathVariable Integer id) {
@@ -97,7 +112,13 @@ public class RoleController {
                          @RequestParam Integer pageSize) {
     QueryWrapper<Role> queryWrapper = new QueryWrapper<Role>().orderByDesc("id");
     queryWrapper.like(!"".equals(name), "name", name);
-    return Result.success(roleService.page(new Page<>(pageNum, pageSize), queryWrapper));
+    Page<Role> page = roleService.page(new Page<>(pageNum, pageSize), queryWrapper);
+    List<RolePermission> rolePermissions = rolePermissionMapper.selectList(null);
+    page.getRecords().forEach(v -> {
+      v.setPermissionIds(rolePermissions.stream().filter(rolePermission -> rolePermission.getRoleId().equals(v.getId()))
+        .map(RolePermission::getPermissionId).collect(Collectors.toList()));
+    });
+    return Result.success(page);
   }
 
   /**
