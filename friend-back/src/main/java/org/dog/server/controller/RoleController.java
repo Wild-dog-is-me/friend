@@ -49,40 +49,19 @@ public class RoleController {
 
   @PostMapping
   public Result save(@RequestBody Role role) {
-    try {
-      roleService.save(role);
-      roleService.savePermission(role.getId(), role.getPermissionIds());
-
-    } catch (Exception e) {
-      log.error("新增错误", e);
-      if (e instanceof DuplicateKeyException) {
-        return Result.error("重复添加错误");
-      }
-      return Result.error("添加错误");
-    }
-    return Result.success();
-  }
-
-  @PostMapping("/rolePermission")
-  public Result rolePermission(@RequestBody List<RolePermission> rolePermissionList) {
+    roleService.save(role);
+    // 存储角色的权限数据
+    roleService.savePermissions(role.getId(), role.getPermissionIds());
     return Result.success();
   }
 
   @PutMapping
   public Result update(@RequestBody Role role) {
-    try {
-      roleService.updateById(role);
-      roleService.savePermission(role.getId(), role.getPermissionIds());
-    } catch (Exception e) {
-      log.error("更新错误", e);
-      if (e instanceof DuplicateKeyException) {
-        return Result.error("重复添加错误");
-      }
-      return Result.error("更新错误");
-    }
+    roleService.updateById(role);
+    // 存储角色的权限数据
+    roleService.savePermissions(role.getId(), role.getPermissionIds());
     return Result.success();
   }
-
 
   @DeleteMapping("/{id}")
   public Result delete(@PathVariable Integer id) {
@@ -115,7 +94,7 @@ public class RoleController {
     Page<Role> page = roleService.page(new Page<>(pageNum, pageSize), queryWrapper);
     List<RolePermission> rolePermissions = rolePermissionMapper.selectList(null);
     page.getRecords().forEach(v -> {
-      v.setPermissionIds(rolePermissions.stream().filter(rolePermission -> rolePermission.getRoleId().equals(v.getId()))
+      v.setPermissionIds(rolePermissions.stream().filter(rolePermission -> rolePermission.getId().equals(v.getId()))
         .map(RolePermission::getPermissionId).collect(Collectors.toList()));
     });
     return Result.success(page);

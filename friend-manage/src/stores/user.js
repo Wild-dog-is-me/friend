@@ -2,35 +2,41 @@ import { defineStore } from 'pinia'
 import router from "@/router";
 
 export const useUserStore = defineStore('manager', {
-    state: () => ({
-        managerInfo: {}
-    }),
-    getters: {
-        getUserId() {
-            return this.managerInfo.user ? this.managerInfo.user.id : 0
-        },
-        getUser() {
-            return this.managerInfo.user || {}
-        },
-        getBearerToken() {
-            return this.managerInfo.token ? 'Bearer ' + this.managerInfo.token : ''
-        },
-        getToken() {
-            return this.managerInfo.token || ""
-        }
+  state: () => ({
+    managerInfo: {}
+  }),
+  getters: {
+    getUserId() {
+      return this.managerInfo.user ? this.managerInfo.user.id : 0
     },
-    actions: {
-        setManagerInfo(managerInfo) {
-            this.managerInfo = managerInfo
-        },
-        setUser(user) {
-            this.managerInfo.user = JSON.parse(JSON.stringify(user))
-        },
-        logout() {
-            localStorage.removeItem('manager')
-            router.push('/login')
-        }
+    getUser() {
+      return this.managerInfo.user || {}
     },
-    // 开启数据持久化
-    persist: true
+    getBearerToken() {
+      return this.managerInfo.token ? 'Bearer ' + this.managerInfo.token : ''
+    },
+    getToken() {
+      return this.managerInfo.token || ""
+    },
+    getMenus() {
+      return this.managerInfo.menus || []
+    },
+    getAuths() {
+      return this.managerInfo.auths || []
+    }
+  },
+  actions: {
+    setManagerInfo(managerInfo) {
+      this.managerInfo = managerInfo
+    },
+    setUser(user) {
+      this.managerInfo.user = JSON.parse(JSON.stringify(user))
+    },
+    logout() {
+      localStorage.removeItem('manager')
+      router.push('/login')
+    }
+  },
+  // 开启数据持久化
+  persist: true
 })

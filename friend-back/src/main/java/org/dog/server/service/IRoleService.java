@@ -16,5 +16,5 @@ import java.util.List;
  */
 public interface IRoleService extends IService<Role> {
 
-  void savePermission(Integer roleId, List<Integer> permissionIds);
+  void savePermissions(Integer roleId, List<Integer> permissionIds);
 }

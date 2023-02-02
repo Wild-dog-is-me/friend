@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dog.server.entity.Permission;
 import org.dog.server.entity.User;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @Author: Odin
@@ -22,4 +24,6 @@ public class LoginDTO implements Serializable {
 
   private User user;
   private String token;
+  private List<Permission> menus;
+  private List<Permission> auths;
 }

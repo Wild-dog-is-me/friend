@@ -14,9 +14,15 @@ import org.dog.server.common.Constants;
 import org.dog.server.common.enums.EmailCodeEnum;
 import org.dog.server.controller.domain.LoginDTO;
 import org.dog.server.controller.domain.UserRequest;
+import org.dog.server.entity.Permission;
+import org.dog.server.entity.Role;
+import org.dog.server.entity.RolePermission;
 import org.dog.server.entity.User;
 import org.dog.server.exception.ServiceException;
+import org.dog.server.mapper.RolePermissionMapper;
 import org.dog.server.mapper.UserMapper;
+import org.dog.server.service.IPermissionService;
+import org.dog.server.service.IRoleService;
 import org.dog.server.service.IUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.dog.server.utils.EmailUtils;
@@ -25,8 +31,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 /**
@@ -45,6 +55,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
   @Resource
   EmailUtils emailUtils;
+
+  @Resource
+  private RolePermissionMapper rolePermissionMapper;
+
+  @Resource
+  private IRoleService roleService;
+
+  @Resource
+  private IPermissionService permissionService;
+
 
   @Override
   public LoginDTO login(UserRequest user) {
@@ -66,7 +86,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     StpUtil.getSession().set(Constants.LOGIN_USER_KEY, dbUser);
     String tokenValue = StpUtil.getTokenInfo().getTokenValue();
 //        LoginDTO loginDTO = new LoginDTO(dbUser, tokenValue);
-    return LoginDTO.builder().user(dbUser).token(tokenValue).build();
+    // 查询用户的菜单数（两层）
+    String flag = dbUser.getRole();
+    List<Permission> all = getPermissions(flag); // 水平
+    List<Permission> menus = getTreePermissions(all); // 树型
+    // 页面的按钮权限
+    List<Permission> auths = all.stream().filter(permission -> permission.getType() == 3).collect(Collectors.toList());
+    return LoginDTO.builder().user(dbUser).token(tokenValue).menus(menus).auths(auths).build();
+  }
+
+  private List<Permission> getPermissions(String roleFlag) {
+    Role role = roleService.getOne(new QueryWrapper<Role>().eq("flag", roleFlag));
+    List<RolePermission> rolePermissions =
+      rolePermissionMapper.selectList(new QueryWrapper<RolePermission>().eq("role_id", role.getId()));
+    List<Integer> permissionIds = rolePermissions.stream().map(RolePermission::getPermissionId)
+      .collect(Collectors.toList());
+    List<Permission> permissionList = permissionService.list();
+    List<Permission> all = new ArrayList<>();
+    for (Integer permissionId : permissionIds) {
+      permissionList.stream().filter(permission -> permission.getId().equals(permissionId)).findFirst()
+        .ifPresent(all::add);
+    }
+    return all;
+  }
+
+  private List<Permission> getTreePermissions(List<Permission> all) {
+    List<Permission> parentList = all.stream().filter(permission -> permission.getType() == 1)
+      .collect(Collectors.toList());
+    for (Permission permission : parentList) {
+      Integer pid = permission.getId();
+      List<Permission> level2List = all.stream().filter(permission1 -> pid.equals(permission1.getPid()))
+        .collect(Collectors.toList());
+      permission.setChildren(level2List);
+    }
+    return parentList.stream().sorted(Comparator.comparing(Permission::getOrders)).collect(Collectors.toList());  // 排序
   }
 
   @Override

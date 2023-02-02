@@ -4,48 +4,49 @@ import { User, Lock } from '@element-plus/icons-vue'
 import request from "@/utils/request";
 import {ElMessage} from "element-plus";
 import { useUserStore } from "@/stores/user";
-import router from "@/router";
+import router, {setRoutes} from "@/router";
 
-  const loginData = reactive({})
-  const rules = reactive({
-    username: [
-      { required: true, message: '请输入账号', trigger: 'blur' },
-    ],
-    password: [
-      { required: true, message: '请输入密码', trigger: 'blur' },
-      { min: 3, max: 20, message: '密码长度在3-20位之间', trigger: 'blur' },
-    ],
+const loginData = reactive({})
+const rules = reactive({
+  username: [
+    { required: true, message: '请输入账号', trigger: 'blur' },
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 3, max: 20, message: '密码长度在3-20位之间', trigger: 'blur' },
+  ],
+})
+const ruleFormRef = ref()
+const login = () => {
+  ruleFormRef.value.validate(valid => {
+    if (valid) {
+      // 发送表单数据给后台
+      request.post('/login', loginData).then(res => {
+        if (res.code === '200') {
+          ElMessage.success('登录成功')
+          const userStore = useUserStore()
+          userStore.setManagerInfo(res.data)
+          setRoutes()   // 一定要在 push('/') 之前添加路由，否则就会出现无路由访问的情况
+          router.push('/')
+        } else {
+          ElMessage.error(res.msg)
+        }
+      })
+    }
   })
-  const ruleFormRef = ref()
-  const login = () => {
-    ruleFormRef.value.validate(valid => {
-      if (valid) {
-        // 发送表单数据给后台
-        request.post('/login', loginData).then(res => {
-          if (res.code === '200') {
-            ElMessage.success('登录成功')
-            const userStore = useUserStore()
-            userStore.setManagerInfo(res.data)
-            router.push('/')
-          } else {
-            ElMessage.error(res.msg)
-          }
-        })
-      }
-    })
-  }
+}
 
 </script>
 
 <template>
-  <div style="height: 100vh; overflow: hidden; background-image: linear-gradient(45deg, #93a5cf 0%, #e4efe9 100%);">
-    <div style="width: 400px; margin: 250px auto;background-image: linear-gradient(to top, #a8edea 0%, #fed6e3 100%); border: 1px solid #ddd; padding: 30px; border-radius: 10px">
+  <div style="height: 100vh; overflow: hidden; background-color: aliceblue">
+    <div style="width: 400px; margin: 150px auto; background-color: white; border: 1px solid #ddd; padding: 30px; border-radius: 10px">
       <el-form
-          ref="ruleFormRef"
-          :model="loginData"
-          :rules="rules"
-          size="large"
-          status-icon
+        ref="ruleFormRef"
+        :model="loginData"
+        :rules="rules"
+        size="large"
+        status-icon
       >
         <div style="text-align: center; color: dodgerblue; font-size: 30px; font-weight: bold; margin-bottom: 30px">登 录</div>
         <el-form-item prop="username">

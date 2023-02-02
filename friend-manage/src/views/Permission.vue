@@ -1,9 +1,9 @@
 <script setup>
 import {nextTick, reactive, ref} from "vue";
-import request from "@/utils/request";
+import request from "../utils/request";
 import {ElMessage} from "element-plus";
 import config from "../../config";
-import {useUserStore} from "@/stores/user";
+import {useUserStore} from "../stores/user";
 
 const state = reactive({
   tableData: [],
@@ -163,9 +163,8 @@ const handleNodeClick = (data) => {
     <div style="margin: 10px 0">
       <el-button type="success" @click="handleAdd">
         <el-icon style="vertical-align: middle">
-          <Plus/>
-        </el-icon>
-        <span style="vertical-align: middle"> 新增 </span>
+          <Plus />
+        </el-icon>  <span style="vertical-align: middle"> 新增 </span>
       </el-button>
       <el-popconfirm title="您确定删除吗？" @confirm="confirmDelBatch">
         <template #reference>
@@ -180,7 +179,7 @@ const handleNodeClick = (data) => {
 
     <div style="margin: 10px 0">
       <el-table :data="state.tableData" stripe border row-key="id"  default-expand-all  @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="35" />
+        <el-table-column type="selection" width="55" />
         <el-table-column prop="id" label="编号"></el-table-column>
         <el-table-column prop="name" label="名称"></el-table-column>
         <el-table-column prop="path" label="访问路径"></el-table-column>
@@ -188,7 +187,7 @@ const handleNodeClick = (data) => {
         <el-table-column prop="orders" label="顺序"></el-table-column>
         <el-table-column prop="icon" label="图标"></el-table-column>
         <el-table-column prop="auth" label="权限"></el-table-column>
-<!--        <el-table-column prop="pid" label="父级"></el-table-column>-->
+        <el-table-column prop="pid" label="父级"></el-table-column>
         <el-table-column prop="type" label="类型">
           <template #default="scope">
             <el-tag type="warning" v-if="scope.row.type === 1">菜单目录</el-tag>

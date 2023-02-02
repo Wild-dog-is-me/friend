@@ -1,12 +1,6 @@
 <script setup>
 import { RouterView } from 'vue-router'
 import router from "@/router";
-import {
-  Document,
-  Menu as IconMenu,
-  Location,
-  Setting
-} from '@element-plus/icons-vue'
 import {useUserStore} from "@/stores/user";
 import request from "@/utils/request";
 import {ElMessage} from "element-plus";
@@ -16,13 +10,13 @@ const user = userStore.getUser
 const logout = () => {
   request.get('/logout/' + user.uid).then(res => {
     if (res.code === '200') {
-      // this.$router.push(".")
       userStore.logout()
     } else {
       ElMessage.error(res.msg)
     }
   })
 }
+const menus = userStore.getMenus
 </script>
 
 <template>
@@ -55,31 +49,42 @@ const logout = () => {
     <div style="display: flex">
       <div style="width: 200px; min-height: calc(100vh - 60px); border-right: 1px solid #ccc">
         <el-menu
-            router
-            default-active="/"
-            class="el-menu-vertical-demo"
+          :default-active="'home'"
+          :default-openeds="menus.map(v => v.id + '')"
+          class="el-menu-demo"
+          style="border: none"
+          router
         >
-          <el-sub-menu index="1">
-            <template #title>
-              <el-icon><location /></el-icon>
-              <span>Navigator One</span>
-            </template>
-            <el-menu-item index="/user">用户</el-menu-item>
-            <el-menu-item index="/role">角色</el-menu-item>
-            <el-menu-item index="/permission">权限</el-menu-item>
-          </el-sub-menu>
-          <el-menu-item index="2">
-            <el-icon><icon-menu /></el-icon>
-            <span>Navigator Two</span>
-          </el-menu-item>
-          <el-menu-item index="3" disabled>
-            <el-icon><document /></el-icon>
-            <span>Navigator Three</span>
-          </el-menu-item>
-          <el-menu-item index="4">
-            <el-icon><setting /></el-icon>
-            <span>Navigator Four</span>
-          </el-menu-item>
+          <div v-for="item in menus" :key="item.id">
+            <div v-if="item.type === 2">
+              <el-menu-item :index="item.path" v-if="!item.hide">
+                <el-icon v-if="item.icon">
+                  <component :is="item.icon"></component>
+                </el-icon>
+                <span>{{ item.name }}</span>
+              </el-menu-item>
+            </div>
+            <div v-else>
+              <el-sub-menu :index="item.id + ''" v-if="!item.hide">
+                <template #title>
+                  <el-icon v-if="item.icon">
+                    <component :is="item.icon"></component>
+                  </el-icon>
+                  <span>{{ item.name }}</span>
+                </template>
+                <div  v-for="subItem in item.children" :key="subItem.id">
+                  <el-menu-item :index="subItem.path" v-if="!subItem.hide">
+                    <template #title>
+                      <el-icon v-if="subItem.icon">
+                        <component :is="subItem.icon"></component>
+                      </el-icon>
+                      <span>{{ subItem.name }}</span>
+                    </template>
+                  </el-menu-item>
+                </div>
+              </el-sub-menu>
+            </div>
+          </div>
         </el-menu>
       </div>
 

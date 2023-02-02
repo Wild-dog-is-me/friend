@@ -31,7 +31,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
 
   @Transactional
   @Override
-  public void savePermission(Integer roleId, List<Integer> permissionIds) {
+  public void savePermissions(Integer roleId, List<Integer> permissionIds) {
     if (CollUtil.isEmpty(permissionIds) || roleId == null) {
       throw new ServiceException("数据不能为空");
     }
