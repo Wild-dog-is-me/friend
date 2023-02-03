@@ -1,5 +1,6 @@
 package org.dog.server.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelUtil;
@@ -35,49 +36,57 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Odin
  * @since 2023-01-04
  */
-@Slf4j
 @RestController
 @RequestMapping("/user")
+@Slf4j
 public class UserController {
 
   @Resource
   private IUserService userService;
 
+  // 新增或者更新
   @PostMapping
+  @SaCheckPermission("user.add")
   public Result save(@RequestBody User user) {
-    userService.save(user);
+    userService.saveUser(user);
     return Result.success();
   }
 
   @PutMapping
+  @SaCheckPermission("user.edit")
   public Result update(@RequestBody User user) {
     userService.updateById(user);
     return Result.success();
   }
 
   @DeleteMapping("/{id}")
+  @SaCheckPermission("user.delete")
   public Result delete(@PathVariable Integer id) {
     userService.removeById(id);
     return Result.success();
   }
 
   @PostMapping("/del/batch")
+  @SaCheckPermission("user.deleteBatch")
   public Result deleteBatch(@RequestBody List<Integer> ids) {
     userService.removeByIds(ids);
     return Result.success();
   }
 
   @GetMapping
+  @SaCheckPermission("user.list")
   public Result findAll() {
     return Result.success(userService.list());
   }
 
   @GetMapping("/{id}")
+  @SaCheckPermission("user.list")
   public Result findOne(@PathVariable Integer id) {
     return Result.success(userService.getById(id));
   }
 
   @GetMapping("/page")
+  @SaCheckPermission("user.list")
   public Result findPage(@RequestParam(defaultValue = "") String name,
                          @RequestParam(defaultValue = "") String address,
                          @RequestParam Integer pageNum,
@@ -93,6 +102,7 @@ public class UserController {
    * 导出接口
    */
   @GetMapping("/export")
+  @SaCheckPermission("user.export")
   public void export(HttpServletResponse response) throws Exception {
     // 从数据库查询出所有的数据
     List<User> list = userService.list();
@@ -111,23 +121,26 @@ public class UserController {
     writer.flush(out, true);
     out.close();
     writer.close();
-
   }
 
   /**
    * excel 导入
-   *
    * @param file
    * @throws Exception
    */
   @PostMapping("/import")
+  @SaCheckPermission("user.import")
   public Result imp(MultipartFile file) throws Exception {
+    // 文件上传
     InputStream inputStream = file.getInputStream();
     ExcelReader reader = ExcelUtil.getReader(inputStream);
     // 通过 javabean的方式读取Excel内的对象，但是要求表头必须是英文，跟javabean的属性要对应起来
     List<User> list = reader.readAll(User.class);
 
-    userService.saveBatch(list);
+//        userService.saveBatch(list);
+    for (User user : list) {
+      userService.saveUser(user);
+    }
     return Result.success();
   }
 

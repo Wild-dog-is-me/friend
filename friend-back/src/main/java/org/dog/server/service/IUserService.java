@@ -2,8 +2,11 @@ package org.dog.server.service;
 
 import org.dog.server.controller.domain.LoginDTO;
 import org.dog.server.controller.domain.UserRequest;
+import org.dog.server.entity.Permission;
 import org.dog.server.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * <p>
@@ -24,5 +27,9 @@ public interface IUserService extends IService<User> {
   String passwordReset(UserRequest userRequest);
 
   void logout(String uid);
+
+  User saveUser(User user);
+
+  List<Permission> getPermissions(String roleFlag);
 
 }

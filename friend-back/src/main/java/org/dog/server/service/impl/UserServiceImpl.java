@@ -95,7 +95,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     return LoginDTO.builder().user(dbUser).token(tokenValue).menus(menus).auths(auths).build();
   }
 
-  private List<Permission> getPermissions(String roleFlag) {
+  public List<Permission> getPermissions(String roleFlag) {
     Role role = roleService.getOne(new QueryWrapper<Role>().eq("flag", roleFlag));
     List<RolePermission> rolePermissions =
       rolePermissionMapper.selectList(new QueryWrapper<RolePermission>().eq("role_id", role.getId()));
@@ -104,8 +104,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     List<Permission> permissionList = permissionService.list();
     List<Permission> all = new ArrayList<>();
     for (Integer permissionId : permissionIds) {
-      permissionList.stream().filter(permission -> permission.getId().equals(permissionId)).findFirst()
-        .ifPresent(all::add);
+      permissionList.stream().filter(permission -> permission.getId().equals(permissionId)).findFirst().ifPresent(all::add);
     }
     return all;
   }
@@ -228,7 +227,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
   }
 
 
-  private User saveUser(User user) {
+  public User saveUser(User user) {
     User dbUser = getOne(new UpdateWrapper<User>().eq("username", user.getUsername()));
     if (dbUser != null) {
       throw new ServiceException("用户已注册");
