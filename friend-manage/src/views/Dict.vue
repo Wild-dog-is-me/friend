@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, reactive, ref } from "vue";
+import {nextTick, reactive, ref} from "vue";
 import request from "@/utils/request";
 import {ElMessage} from "element-plus";
 import config from "../../config";
@@ -27,7 +27,7 @@ const confirmDelBatch = () => {
     return
   }
   const idArr = multipleSelection.value.map(v => v.id)
-  request.post('/{lowerEntity}/del/batch', idArr).then(res => {
+  request.post('/dict/del/batch', idArr).then(res => {
     if (res.code === '200') {
       ElMessage.success('操作成功')
       load()  // 刷新表格数据
@@ -38,7 +38,7 @@ const confirmDelBatch = () => {
 }
 
 const load = () => {
-  request.get('/{lowerEntity}/page', {
+  request.get('/dict/page', {
     params: {
       name: name.value,
       pageNum: pageNum.value,
@@ -79,7 +79,7 @@ const save = () => {
   ruleFormRef.value.validate(valid => {   // valid就是校验的结果
     if (valid) {
       request.request({
-        url: '/{lowerEntity}',
+        url: '/dict',
         method: state.form.id ? 'put' : 'post',
         data: state.form
       }).then(res => {
@@ -106,7 +106,7 @@ const handleEdit = (raw) => {
 
 // 删除
 const del = (id) => {
-  request.delete('/{lowerEntity}/' + id).then(res => {
+  request.delete('/dict/' + id).then(res => {
     if (res.code === '200') {
       ElMessage.success('操作成功')
       load()  // 刷新表格数据
@@ -118,7 +118,7 @@ const del = (id) => {
 
 // 导出接口
 const exportData = () => {
-  window.open(`http://${config.serverUrl}/{lowerEntity}/export`)
+  window.open(`http://${config.serverUrl}/dict/export`)
 }
 
 const userStore = useUserStore()
@@ -155,12 +155,12 @@ const handleImportSuccess = () => {
         </el-icon>  <span style="vertical-align: middle"> 新增 </span>
       </el-button>
       <el-upload
-          class="ml5"
-          :show-file-list="false"
-          style="display: inline-block; position: relative; top: 3px"
-          :action='`http://${config.serverUrl}/{lowerEntity}/import`'
-          :on-success="handleImportSuccess"
-          :headers="{ Authorization: token}"
+        class="ml5"
+        :show-file-list="false"
+        style="display: inline-block; position: relative; top: 3px"
+        :action='`http://${config.serverUrl}/dict/import`'
+        :on-success="handleImportSuccess"
+        :headers="{ Authorization: token}"
       >
         <el-button type="primary">
           <el-icon style="vertical-align: middle">
@@ -187,7 +187,17 @@ const handleImportSuccess = () => {
     <div style="margin: 10px 0">
       <el-table :data="state.tableData" stripe border  @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
-{tableBody}
+        <el-table-column prop="id" label="编号"></el-table-column>
+        <el-table-column prop="code" label="编码"></el-table-column>
+        <el-table-column prop="value" label="内容">
+          <template #default="scope">
+            <el-icon>
+              <component :is="scope.row.value" />
+            </el-icon>
+          </template>
+        </el-table-column>
+        <el-table-column prop="type" label="类型"></el-table-column>
+
         <el-table-column label="操作" width="180">
           <template #default="scope">
             <el-button type="primary" @click="handleEdit(scope.row)">编辑</el-button>
@@ -203,20 +213,31 @@ const handleImportSuccess = () => {
 
     <div style="margin: 10px 0">
       <el-pagination
-          @current-change="load"
-          @size-change="load"
-          v-model:current-page="pageNum"
-          v-model:page-size="pageSize"
-          background
-          :page-sizes="[2, 5, 10, 20]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
+        @current-change="load"
+        @size-change="load"
+        v-model:current-page="pageNum"
+        v-model:page-size="pageSize"
+        background
+        :page-sizes="[2, 5, 10, 20]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
       />
     </div>
 
     <el-dialog v-model="dialogFormVisible" title="信息" width="40%">
       <el-form ref="ruleFormRef" :rules="rules" :model="state.form" label-width="80px" style="padding: 0 20px" status-icon>
-{formBody}
+        <el-form-item prop="code" label="编码" >
+          <el-input v-model="state.form.code" autocomplete="off" />
+        </el-form-item>
+        <el-form-item prop="value" label="内容" >
+          <el-input v-model="state.form.value" autocomplete="off" />
+        </el-form-item>
+        <el-form-item prop="type" label="类型" >
+          <el-select v-model="state.form.type" style="width: 100%">
+            <el-option v-for="item in ['icon']" :key="item" :label="item" :value="item"></el-option>
+          </el-select>
+        </el-form-item>
+
       </el-form>
       <template #footer>
       <span class="dialog-footer">

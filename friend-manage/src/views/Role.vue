@@ -254,8 +254,8 @@ const logout = () => {
 
     <div style="margin: 10px 0">
       <el-pagination
-        @current-change="currentChange"
-        @size-change="sizeChange"
+        @current-change="load"
+        @size-change="load"
         v-model:current-page="pageNum"
         v-model:page-size="pageSize"
         background

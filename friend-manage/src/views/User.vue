@@ -64,15 +64,6 @@ const reset = () => {
   load()
 }
 
-const currentChange = (num) => {
-  pageNum.value = num
-  load()
-}
-const sizeChange = (size) => {
-  pageSize.value = size
-  load()
-}
-
 const dialogFormVisible = ref(false)
 
 const rules = reactive({
@@ -151,6 +142,7 @@ const exportData = () => {
 
 const userStore = useUserStore()
 const token = userStore.getBearerToken
+const auths = userStore.getAuths
 
 const handleImportSuccess = () => {
   // 刷新表格
@@ -181,12 +173,13 @@ const handleImportSuccess = () => {
     </div>
 
     <div style="margin: 10px 0">
-      <el-button type="success" @click="handleAdd">
+      <el-button type="success" @click="handleAdd" v-if="auths.includes('user.add')">
         <el-icon style="vertical-align: middle">
           <Plus />
         </el-icon>  <span style="vertical-align: middle"> 新增 </span>
       </el-button>
       <el-upload
+        v-if="auths.includes('user.import')"
         class="ml5"
         :show-file-list="false"
         style="display: inline-block; position: relative; top: 3px"
@@ -200,12 +193,12 @@ const handleImportSuccess = () => {
           </el-icon>  <span style="vertical-align: middle"> 导入 </span>
         </el-button>
       </el-upload>
-      <el-button type="primary" @click="exportData" class="ml5">
+      <el-button type="primary" @click="exportData" class="ml5"  v-if="auths.includes('user.export')">
         <el-icon style="vertical-align: middle">
           <Top />
         </el-icon>  <span style="vertical-align: middle"> 导出 </span>
       </el-button>
-      <el-popconfirm title="您确定删除吗？" @confirm="confirmDelBatch">
+      <el-popconfirm title="您确定删除吗？" @confirm="confirmDelBatch" v-if="auths.includes('user.deleteBatch')">
         <template #reference>
           <el-button type="danger" style="margin-left: 5px">
             <el-icon style="vertical-align: middle">
@@ -218,20 +211,20 @@ const handleImportSuccess = () => {
 
     <div style="margin: 10px 0">
       <el-table :data="state.tableData" stripe border  @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" />
+        <el-table-column type="selection" width="55" v-if="auths.includes('user.deleteBatch')" />
         <el-table-column prop="username" label="用户名"></el-table-column>
         <el-table-column prop="name" label="名称"></el-table-column>
         <el-table-column prop="address" label="地址"></el-table-column>
         <el-table-column prop="email" label="邮箱"></el-table-column>
         <el-table-column prop="role" label="角色">
           <template #default="scope">
-            <span v-if="roles.length">{{ roles.find(r => r.flag === scope.row.role).name }}</span>
+            <span v-if="roles.length">{{ roles.find(r => r.flag === scope.row.role) ? roles.find(r => r.flag === scope.row.role).name : '' }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180">
           <template #default="scope">
-            <el-button type="primary" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-popconfirm title="您确定删除吗？" @confirm="del(scope.row.id)">
+            <el-button type="primary" @click="handleEdit(scope.row)"  v-if="auths.includes('user.edit')">编辑</el-button>
+            <el-popconfirm title="您确定删除吗？" @confirm="del(scope.row.id)"  v-if="auths.includes('user.delete')">
               <template #reference>
                 <el-button type="danger">删除</el-button>
               </template>
@@ -243,8 +236,8 @@ const handleImportSuccess = () => {
 
     <div style="margin: 10px 0">
       <el-pagination
-        @current-change="currentChange"
-        @size-change="sizeChange"
+        @current-change="load"
+        @size-change="load"
         v-model:current-page="pageNum"
         v-model:page-size="pageSize"
         background

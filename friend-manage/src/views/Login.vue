@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref} from "vue"
+import {onMounted, reactive, ref} from "vue"
 import { User, Lock } from '@element-plus/icons-vue'
 import request from "@/utils/request";
 import {ElMessage} from "element-plus";
@@ -26,7 +26,6 @@ const login = () => {
           ElMessage.success('登录成功')
           const userStore = useUserStore()
           userStore.setManagerInfo(res.data)
-          setRoutes()   // 一定要在 push('/') 之前添加路由，否则就会出现无路由访问的情况
           router.push('/')
         } else {
           ElMessage.error(res.msg)

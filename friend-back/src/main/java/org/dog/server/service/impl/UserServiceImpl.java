@@ -111,7 +111,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
   }
 
   private List<Permission> getTreePermissions(List<Permission> all) {
-    List<Permission> parentList = all.stream().filter(permission -> permission.getType() == 1)
+    List<Permission> parentList = all.stream().filter(permission -> permission.getPid() == null)
       .collect(Collectors.toList());
     for (Permission permission : parentList) {
       Integer pid = permission.getId();

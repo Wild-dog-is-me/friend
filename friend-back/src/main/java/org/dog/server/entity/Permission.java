@@ -69,17 +69,21 @@ public class Permission implements Serializable {
   @Alias("权限")
   private String auth;
 
-  // 逻辑删除
-  @ApiModelProperty("逻辑删除")
-  @Alias("逻辑删除")
-  @TableLogic(value = "0", delval = "id")
-  private Integer deleted;
+  // 父级id
+  @ApiModelProperty("父级id")
+  @Alias("父级id")
+  private Integer pid;
+
 
   @ApiModelProperty("类型")
   @Alias("类型")
   private Integer type;
 
-  private Boolean hide;
+  // 逻辑删除
+  @ApiModelProperty("逻辑删除")
+  @Alias("逻辑删除")
+  @TableLogic(value = "0", delval = "id")
+  private Integer deleted;
 
   // 创建时间
   @ApiModelProperty("创建时间")
@@ -97,11 +101,9 @@ public class Permission implements Serializable {
   @JsonSerialize(using = LDTConfig.CmzLdtSerializer.class)
   private LocalDateTime updateTime;
 
-  // 父id
-  @ApiModelProperty("父id")
-  @Alias("父id")
-  private Integer pid;
-
   @TableField(exist = false)
   private List<Permission> children;
+  @ApiModelProperty("是否隐藏")
+  @Alias("是否隐藏")
+  private Boolean hide;
 }

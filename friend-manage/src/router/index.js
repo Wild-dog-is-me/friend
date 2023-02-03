@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import {useUserStore} from "@/stores/user"
+const modules = import.meta.glob('../views/*.vue')
+const layoutModules = import.meta.glob('../layout/Layout.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,29 +20,32 @@ const router = createRouter({
 })
 
 // 注意：刷新页面会导致页面路由重置
-export const setRoutes = () => {
-  const manager = localStorage.getItem('manager')
-  if (!manager) {
-    return
+export const setRoutes = (menus) => {
+  if (!menus || !menus.length) {
+    const manager = localStorage.getItem('manager')
+    if (!manager) {
+      return
+    }
+    menus = JSON.parse(manager).managerInfo.menus
   }
-  const menus = JSON.parse(manager).managerInfo.menus
+
   if (menus.length) {
     // 拼装动态路由
-    const layoutRoute = { path: '/', name: 'Layout', component: () => import('../layout/Layout.vue'), redirect: "/home",
+    const layoutRoute = { path: '/', name: 'Layout', component: layoutModules['../layout/Layout.vue'], redirect: "/home",
       children: [
-        { path: 'home', name: 'Home', component: () => import('../views/Home.vue') }
+        { path: 'home', name: 'Home', component: modules['../views/Home.vue'] }
       ]
     }
     // 开始渲染 未来的不确定的  用户添加的路由
     menus.forEach(item => {   // 所有的页面都需要设置路由，而目录不需要设置路由
       if (item.path) {  // 当且仅当path不为空的时候才去设置路由
-        let itemMenu = { path: item.path, name: item.page, component: () => import('../views/' + item.page + '.vue')}
+        let itemMenu = { path: item.path, name: item.page, component: modules['../views/' + item.page + '.vue'] }
         layoutRoute.children.push(itemMenu)
       } else {
         if (item.children && item.children.length) {
           item.children.forEach(sub => {
             if (sub.path) {
-              let subMenu = { path: sub.path, name: sub.page, component: () => import('../views/' + sub.page + '.vue')}
+              let subMenu = { path: sub.path, name: sub.page, component: modules['../views/' + sub.page + '.vue'] }
               layoutRoute.children.push(subMenu)
             }
           })

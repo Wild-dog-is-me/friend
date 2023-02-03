@@ -1,9 +1,9 @@
 <script setup>
 import {nextTick, reactive, ref} from "vue";
-import request from "../utils/request";
+import request from "@/utils/request";
 import {ElMessage} from "element-plus";
 import config from "../../config";
-import {useUserStore} from "../stores/user";
+import {useUserStore} from "@/stores/user";
 
 const state = reactive({
   tableData: [],
@@ -93,6 +93,8 @@ const changeHide = (row) => {
   })
 }
 
+// 图标字典集合
+const icons = ref([])
 // 编辑
 const handleEdit = (raw) => {
   dialogFormVisible.value = true
@@ -100,7 +102,10 @@ const handleEdit = (raw) => {
     ruleFormRef.value.resetFields()
     state.form = JSON.parse(JSON.stringify(raw))
 
-    // getTreeArr(raw)
+    // 请求了icon的数据集合
+    request.get('/dict/icons').then(res => {
+      icons.value = res.data
+    })
   })
 }
 
@@ -138,11 +143,6 @@ const handleImportSuccess = () => {
   load()
   ElMessage.success("导入成功")
 }
-
-// 权限树状的数据
-const options = ref([])
-// 图标字典集合
-const icons = ref([])
 
 const handleNodeClick = (data) => {
   if (data.id === state.form.id) {  // 当前编辑行的id跟选择的父节点的id如果相同的话，就不让他选择
@@ -185,7 +185,13 @@ const handleNodeClick = (data) => {
         <el-table-column prop="path" label="访问路径"></el-table-column>
         <el-table-column prop="page" label="页面路径"></el-table-column>
         <el-table-column prop="orders" label="顺序"></el-table-column>
-        <el-table-column prop="icon" label="图标"></el-table-column>
+        <el-table-column prop="icon" label="图标">
+          <template #default="scope">
+            <el-icon>
+              <component :is="scope.row.icon" />
+            </el-icon>
+          </template>
+        </el-table-column>
         <el-table-column prop="auth" label="权限"></el-table-column>
         <el-table-column prop="pid" label="父级"></el-table-column>
         <el-table-column prop="type" label="类型">
@@ -240,10 +246,15 @@ const handleNodeClick = (data) => {
           <el-select v-model="state.form.icon"  placeholder="请选择" style="width: 100%">
             <el-option
               v-for="item in icons"
-              :key="item"
-              :label="item"
-              :value="item"
-            />
+              :key="item.id"
+              :label="item.code"
+              :value="item.value"
+            >
+              <el-icon>
+                <component :is="item.value"></component>
+              </el-icon>
+              <span style="font-size: 14px; margin-left: 5px; top: -3px">{{ item.code }}</span>
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item prop="auth" label="权限"  v-if="state.form.type === 2 || state.form.type === 3" >

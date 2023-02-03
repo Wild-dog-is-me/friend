@@ -15,7 +15,7 @@ import {useUserStore} from "@/stores/user";
 
 const name = ref('')
 const pageNum = ref(1)
-const pageSize = ref(2)
+const pageSize = ref(5)
 const total = ref(0)
 
 const state = reactive({
